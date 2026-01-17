@@ -1,0 +1,39 @@
+{
+  "name": "commitria",
+  "version": "1.0.0",
+  "description": "Generate conventional commit messages using Claude AI",
+  "type": "module",
+  "main": "dist/cli.js",
+  "bin": {
+    "commitria": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "git",
+    "commit",
+    "conventional-commits",
+    "claude",
+    "ai",
+    "cli",
+    "commitria"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  }
+}
