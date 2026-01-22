@@ -1,8 +1,6 @@
-import type { GitDiff } from "./git.js";
-
-export function buildCommitPrompt(diff: GitDiff): string {
+export function buildCommitPrompt(diff: { content: string }): string {
   return `
-Write ONE Conventional Commit message for the following ${diff.mode} git diff.
+Write ONE Conventional Commit message for the following staged git diff.
 
 Rules:
 - Output ONLY the commit message (no code fences, no extra commentary).

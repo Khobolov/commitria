@@ -25,23 +25,12 @@ export function isInsideGitRepo(): boolean {
   }
 }
 
-export interface GitDiff {
-  content: string;
-  mode: "staged" | "unstaged";
+export function getStagedDiff(): string | null {
+  const content = execGit("diff --staged").trim();
+  return content || null;
 }
 
-export function getGitDiff(): GitDiff | null {
-  // Prefer staged changes
-  let content = execGit("diff --staged").trim();
-  if (content) {
-    return { content, mode: "staged" };
-  }
-
-  // Fall back to unstaged changes
-  content = execGit("diff").trim();
-  if (content) {
-    return { content, mode: "unstaged" };
-  }
-
-  return null;
+export function getUnstagedDiff(): string | null {
+  const content = execGit("diff").trim();
+  return content || null;
 }

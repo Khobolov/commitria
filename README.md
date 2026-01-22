@@ -50,7 +50,7 @@ You get commit message generation at **no additional cost**.
 - **No extra costs** - Leverage your existing subscription
 - **Multi-provider** - Switch between Claude, Codex, and more
 - **Conventional Commits** - Always follows the standard
-- **Smart detection** - Prefers staged changes, falls back to unstaged
+- **Flexible** - Works with unstaged changes by default, or staged with `-s` flag
 - **Beautiful output** - Colored, formatted, ready to use
 - **Cross-platform** - Works on Windows, macOS, and Linux
 
@@ -95,7 +95,9 @@ That's it. No flags, no options, no complexity.
 
 | Command | Description |
 |---------|-------------|
-| `commitria` | Generate commit message |
+| `commitria` | Generate commit message from unstaged changes |
+| `commitria --staged` | Use staged changes instead |
+| `commitria -s` | Short form of --staged |
 | `commitria --provider <name>` | Use specific provider |
 | `commitria -p <name>` | Short form of --provider |
 | `commitria config` | Show current configuration |

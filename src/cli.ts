@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { isGitInstalled, isInsideGitRepo, getGitDiff } from "./git.js";
+import { isGitInstalled, isInsideGitRepo, getStagedDiff, getUnstagedDiff } from "./git.js";
 import { getProvider } from "./providers/index.js";
 import { buildCommitPrompt } from "./prompt.js";
 import { Spinner } from "./spinner.js";
@@ -29,7 +29,8 @@ function printHelp(): void {
 ${colors.cyan}${colors.bold}commitria${colors.reset} - AI-powered commit message generator
 
 ${colors.yellow}Usage:${colors.reset}
-  commitria                     Generate commit message
+  commitria                     Generate commit message from unstaged changes
+  commitria --staged            Use staged changes instead
   commitria --provider <name>   Use specific provider (claude, codex)
   commitria config              Show current configuration
   commitria config set <k> <v>  Set configuration value
@@ -37,14 +38,19 @@ ${colors.yellow}Usage:${colors.reset}
   commitria --help              Show this help message
   commitria --version           Show version
 
+${colors.yellow}Options:${colors.reset}
+  -s, --staged     Use staged changes (git add) instead of unstaged
+  -p, --provider   Specify AI provider (claude, codex)
+
 ${colors.yellow}Providers:${colors.reset}
   claude    Claude Code CLI (default)
   codex     OpenAI Codex CLI
 
 ${colors.yellow}Examples:${colors.reset}
-  commitria                        # Use default provider
-  commitria -p codex               # Use Codex for this run
-  commitria config set provider codex   # Set default to Codex
+  commitria                        # Generate from unstaged changes
+  commitria -s                     # Generate from staged changes
+  commitria -p codex               # Use Codex provider
+  commitria config set provider codex   # Set default provider
 `);
 }
 
@@ -114,8 +120,9 @@ function handleConfigCommand(args: string[]): void {
   process.exit(1);
 }
 
-function parseArgs(args: string[]): { provider?: Provider; command?: string; commandArgs: string[] } {
+function parseArgs(args: string[]): { provider?: Provider; staged: boolean; command?: string; commandArgs: string[] } {
   let provider: Provider | undefined;
+  let staged = false;
   let command: string | undefined;
   const commandArgs: string[] = [];
 
@@ -130,6 +137,11 @@ function parseArgs(args: string[]): { provider?: Provider; command?: string; com
     if (arg === "--version" || arg === "-v") {
       printVersion();
       process.exit(0);
+    }
+
+    if (arg === "--staged" || arg === "-s") {
+      staged = true;
+      continue;
     }
 
     if (arg === "--provider" || arg === "-p") {
@@ -149,10 +161,10 @@ function parseArgs(args: string[]): { provider?: Provider; command?: string; com
     }
   }
 
-  return { provider, command, commandArgs };
+  return { provider, staged, command, commandArgs };
 }
 
-async function generateCommit(providerName: Provider): Promise<void> {
+async function generateCommit(providerName: Provider, useStaged: boolean): Promise<void> {
   // Check prerequisites
   if (!isGitInstalled()) {
     console.error(`${colors.red}Error: git not found. Please install git first.${colors.reset}`);
@@ -176,15 +188,20 @@ async function generateCommit(providerName: Provider): Promise<void> {
     process.exit(1);
   }
 
-  // Get diff
-  const diff = getGitDiff();
+  // Get diff based on mode
+  const diff = useStaged ? getStagedDiff() : getUnstagedDiff();
   if (!diff) {
-    console.error(`${colors.yellow}No changes found (staged or unstaged).${colors.reset}`);
+    if (useStaged) {
+      console.error(`${colors.yellow}No staged changes found.${colors.reset}`);
+      console.error(`${colors.dim}Stage your changes first: git add <files>${colors.reset}`);
+    } else {
+      console.error(`${colors.yellow}No unstaged changes found.${colors.reset}`);
+    }
     process.exit(1);
   }
 
   // Build prompt and run provider
-  const prompt = buildCommitPrompt(diff);
+  const prompt = buildCommitPrompt({ content: diff });
 
   const spinner = new Spinner("Generating commit message...");
   spinner.start();
@@ -207,7 +224,7 @@ async function generateCommit(providerName: Provider): Promise<void> {
 
 async function main(): Promise<void> {
   const args = process.argv.slice(2);
-  const { provider, command, commandArgs } = parseArgs(args);
+  const { provider, staged, command, commandArgs } = parseArgs(args);
 
   // Handle config command
   if (command === "config") {
@@ -217,7 +234,7 @@ async function main(): Promise<void> {
 
   // Generate commit
   const selectedProvider = provider ?? getConfigValue("provider");
-  await generateCommit(selectedProvider);
+  await generateCommit(selectedProvider, staged);
 }
 
 main().catch((err: Error) => {
