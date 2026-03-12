@@ -50,6 +50,7 @@ You get commit message generation at **no additional cost**.
 - **No extra costs** - Leverage your existing subscription
 - **Multi-provider** - Switch between Claude, Codex, and more
 - **Conventional Commits** - Always follows the standard
+- **Ticketing mode** - Auto-prefix commits with Jira ticket ID and task title
 - **Flexible** - Works with unstaged changes by default, or staged with `-s` flag
 - **Beautiful output** - Colored, formatted, ready to use
 - **Cross-platform** - Works on Windows, macOS, and Linux
@@ -100,6 +101,8 @@ That's it. No flags, no options, no complexity.
 | `commitria -s` | Short form of --staged |
 | `commitria --provider <name>` | Use specific provider |
 | `commitria -p <name>` | Short form of --provider |
+| `commitria --title <title>` | Set task title for ticketing mode |
+| `commitria --ticketing` | Enable ticketing mode for this run |
 | `commitria config` | Show current configuration |
 | `commitria config set <key> <value>` | Set configuration value |
 | `commitria config get <key>` | Get configuration value |
@@ -146,6 +149,62 @@ commitria config
 | Key | Values | Default |
 |-----|--------|---------|
 | `provider` | `claude`, `codex` | `claude` |
+| `ticketing` | `true`, `false` | `false` |
+| `ticketPattern` | regex string | `[A-Z]+-\d+` |
+
+---
+
+## Ticketing Mode
+
+For teams that use Jira or similar tools, ticketing mode auto-prefixes commits with the ticket ID and task title.
+
+### Setup
+
+```bash
+# Enable ticketing (one-time)
+commitria config set ticketing true
+```
+
+### Usage
+
+On your first commit for a branch (e.g., `feature/PROJ-1234`), provide the task title:
+
+```bash
+commitria --title="Dashboard - Update user stats"
+```
+
+Every commit after that, just run:
+
+```bash
+commitria
+```
+
+The title is saved per branch — you only set it once.
+
+### Output
+
+```
+Title:
+  PROJ-1234: Dashboard - Update user stats
+
+Description:
+  fix chart rendering and update responsive breakpoints
+```
+
+### How it works
+
+1. Commitria extracts the ticket ID from your branch name (e.g., `PROJ-1234` from `feature/PROJ-1234`)
+2. The task title you provide with `--title` is saved in `.git/commitria.json`
+3. On every commit, the title line is fixed (`TICKET: Title`) and the AI only generates the description
+4. Previous commits on the branch are included as context for better descriptions
+
+### Override title
+
+If the task title changes, just pass `--title` again:
+
+```bash
+commitria --title="Dashboard - Redesign user stats"
+```
 
 ---
 
