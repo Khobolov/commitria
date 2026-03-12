@@ -188,7 +188,9 @@ Title:
   PROJ-1234: Dashboard - Update user stats
 
 Description:
-  fix chart rendering and update responsive breakpoints
+  - fix chart rendering on mobile
+  - update responsive breakpoints
+  - add loading skeleton for stats cards
 ```
 
 ### How it works

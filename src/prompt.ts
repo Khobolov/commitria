@@ -30,8 +30,10 @@ ${ticketId}: ${title}
 
 Rules:
 - Output ONLY the description body (no title line, no code fences, no extra commentary).
-- Describe what changed and why, wrapped at ~72 chars.
-- Use bullet points if multiple changes are involved.
+- Use bullet points starting with "- " for each change.
+- Use short imperative phrases (e.g., "- add user avatar", "- fix card alignment", "- update color scheme").
+- Do NOT use full sentences like "This commit will..." — just the action directly.
+- Wrap lines at ~72 chars.
 `;
 
   if (previousCommits.length > 0) {
