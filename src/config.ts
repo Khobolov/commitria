@@ -6,10 +6,14 @@ export type Provider = "claude" | "codex";
 
 export interface Config {
   provider: Provider;
+  ticketing: boolean;
+  ticketPattern: string;
 }
 
 const DEFAULT_CONFIG: Config = {
   provider: "claude",
+  ticketing: false,
+  ticketPattern: "[A-Z]+-\\d+",
 };
 
 const CONFIG_DIR = join(homedir(), ".commitria");
